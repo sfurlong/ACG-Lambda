@@ -17,8 +17,9 @@ Resources:
   AdventureGuruFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
+      FunctionName: acg-lambda-func
       CodeUri: adventure_guru/
       Handler: lambda_function.handler
       Runtime: python3.8
-      Role: arn:aws:iam::363326780846:role/service-role/adventure-guru-role-48a8fxbg
+      Role: arn:aws:iam::363326780846:role/service-role/adventure-guru-role-48a8fxbg #Lambda IAM Role
 
