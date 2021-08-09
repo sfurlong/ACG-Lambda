@@ -61,7 +61,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
         logger.info("In LaunchRequestHandler")
-        logger.info("The user's location is {} ".format(get_user_location(handler_input)))
+        logger.info("The user's country is {} ".format(get_user_country(handler_input)))
         response_builder = handler_input.response_builder
         include_display(handler_input)
 
@@ -198,7 +198,9 @@ class HelpIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speak_output = "Hello, adventurer! It's good to see you! To play this game, start by saying, visit Italy or visit Australia. If you're stuck on a hard level, say speak to the guide. Don't forget that your wealth or energy either increase or decrease based on the choices you make while on your adventure. When you run out of either, the game ends. "
+        speak_output = "Hello, adventurer! It's good to see you! Your wealth or energy either increase or decrease based on the choices "
+        "you make while on your adventure. When you run out of either, the game ends. "
+        "To start your adventure, say visit Italy or Australia."
 
         response_builder = handler_input.response_builder
         include_display(handler_input)
@@ -623,17 +625,22 @@ def load_apl_document(file_path):
     with open(file_path) as f:
         return json.load(f)
 
-#Location Services
-#If the device doesn't support location services, nothing is returned
-#Test this from Alexa app on mobile phone instead of stationary Echo device
-def get_user_location(handler_input):
-    if hasattr(handler_input.request_envelope.context.system.device.supported_interfaces, 'geolocation'):
-        if hasattr(handler_input.request_envelope.context.geolocation, 'coordinate'):
-            return handler_input.request_envelope.context.geolocation.coordinate
-        else:
-            return "unsupported on this device"
-    else:
-        return "unsupported on this device"
+#Device Address API
+def get_user_country(handler_input):
+    base_uri = handler_input.request_envelope.context.system.api_endpoint
+    device_id = handler_input.request_envelope.context.system.device.device_id
+    api_access_token = handler_input.request_envelope.context.system.api_access_token
+    response = requests.get(base_uri + "/v1/devices/" + device_id + "/settings/address/countryAndPostalCode",
+                    headers = {
+                        'Accept': 'application/json',
+                        'Authorization': 'Bearer {}'.format(api_access_token)
+                    }
+                )
+    data = json.loads(response.text)
+
+    print("COUNTRY!!!!: " + response.text)
+
+    return data["countryCode"]
 
 # The SkillBuilder object acts as the entry point for your skill, routing all request and response
 # payloads to the handlers above. Make sure any new handlers or interceptors you've
